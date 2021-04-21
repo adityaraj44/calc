@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+    <link rel="manifest" href="./mainfest.webmanifest" />
+
+    <!-- <link rel="stylesheet" href="styles.css"> -->
+  </head>
+  <body>
+    <style>
+      * {
+        outline: none;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      button {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+      }
+
+      #calculator {
+        width: 370px;
+        height: 640px;
+        background: black;
+        border-radius: 10px;
+        margin: 0 auto;
+        top: 10px;
+        position: relative;
+        box-shadow: 0px 4px 8px 0 rgba(0, 0, 0, 0.3),
+          0px 8px 20px 0 rgba(0, 0, 0, 0.25);
+      }
+
+      #result {
+        height: 180px;
+      }
+
+      #keyboard {
+        height: 400px;
+      }
+
+      #history {
+        height: 20px;
+
+        text-align: right;
+        color: white;
+        padding-top: 20px;
+        margin: 0 30px;
+        font-size: 25px;
+      }
+
+      #output {
+        height: 60px;
+        text-align: right;
+        font-size: 40px;
+        font-weight: bold;
+        color: white;
+        margin: 40px 30px;
+      }
+
+      .operator,
+      .number,
+      .empty {
+        width: 60px;
+        height: 60px;
+        line-height: 60px;
+        margin: 15px;
+        float: left;
+        outline: none;
+        border-radius: 100px;
+        color: white;
+        border-width: 0;
+        font-weight: bold;
+        font-size: 25px;
+        color: black;
+      }
+
+      .number {
+        color: white;
+      }
+
+      .number,
+      .empty {
+        background: transparent;
+      }
+
+      .operator,
+      .number {
+        cursor: pointer;
+      }
+
+      .number:focus,
+      .number:active {
+        color: rgb(170, 170, 170);
+      }
+
+      .operator:focus,
+      .operator:active {
+        background: lightskyblue;
+      }
+
+      #clear {
+        background: red;
+      }
+
+      #clear:focus,
+      #clear:active {
+        background: darkred;
+      }
+
+      .add-button {
+        position: absolute;
+        top: 1px;
+        left: 1px;
+      }
+    </style>
+    <div id="container">
+      <div id="calculator">
+        <div id="result">
+          <div id="history">
+            <p id="history-value"></p>
+          </div>
+          <div id="output">
+            <p id="output-value"></p>
+          </div>
+        </div>
+        <div id="keyboard">
+          <button class="operator" id="clear">C</button>
+          <button class="operator" id="backspace">CE</button>
+          <button class="operator" id="%">%</button>
+          <button class="operator" id="/">/</button>
+          <button class="number" id="9">9</button>
+          <button class="number" id="8">8</button>
+          <button class="number" id="7">7</button>
+          <button class="operator" id="*">&times;</button>
+          <button class="number" id="4">4</button>
+          <button class="number" id="5">5</button>
+          <button class="number" id="6">6</button>
+          <button class="operator" id="-">-</button>
+          <button class="number" id="1">1</button>
+          <button class="number" id="2">2</button>
+          <button class="number" id="3">3</button>
+          <button class="operator" id="+">+</button>
+          <button class="empty" id="empty"></button>
+          <button class="number" id="0">0</button>
+          <button class="empty" id="empty"></button>
+          <button class="operator" id="=">=</button>
+        </div>
+      </div>
+    </div>
+    <button class="add-button">Add to home screen</button>
+    <!-- <script src="main.js"></script> -->
+    <script>
+      (function () {
+        function getHistory() {
+          return document.getElementById("history-value").innerText;
+        }
+
+        function printHistory(num) {
+          document.getElementById("history-value").innerText = num;
+        }
+
+        function getOutput() {
+          return document.getElementById("output-value").innerText;
+        }
+
+        function printOutput(num) {
+          if (num == "") {
+            document.getElementById("output-value").innerText = num;
+          } else {
+            document.getElementById(
+              "output-value"
+            ).innerText = getFormattedNumber(num);
+          }
+        }
+
+        function getFormattedNumber(num) {
+          if (num == "-") {
+            return "";
+          } else {
+            var n = Number(num).toLocaleString("en");
+            return n;
+          }
+        }
+
+        function getReversedFormat(num) {
+          return Number(num.replace(/,/g, ""));
+        }
+
+        var operator = document.getElementsByClassName("operator");
+        for (var i = 0; i < operator.length; i++) {
+          operator[i].addEventListener("click", function () {
+            if (this.id == "clear") {
+              printHistory("");
+              printOutput("");
+            } else if (this.id == "backspace") {
+              var output = getReversedFormat(getOutput()).toString();
+              if (output) {
+                output = output.substr(0, output.length - 1);
+                printOutput(output);
+              } // this means if output is possible then the condition
+            } else {
+              var output = getOutput();
+              var history = getHistory();
+              if (output == "" && history !== "") {
+                if (isNaN(history[history.length - 1])) {
+                  history = history.substr(0, history.length - 1);
+                }
+              }
+              if (output != "" || history != "") {
+                // use teranary operator
+                output = output == "" ? output : getReversedFormat(output);
+                history = history + output;
+                if (this.id == "=") {
+                  var result = eval(history);
+                  printHistory("");
+                  printOutput(result);
+                } else {
+                  history = history + this.id;
+                  printHistory(history);
+                  printOutput("");
+                }
+              }
+            }
+          });
+        }
+
+        var number = document.getElementsByClassName("number");
+        for (var i = 0; i < number.length; i++) {
+          number[i].addEventListener("click", function () {
+            var output = getReversedFormat(getOutput());
+            if (output != NaN) {
+              output = output + this.id;
+              printOutput(output);
+            }
+          });
+        }
+      })();
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("./sw.js").then(() => {
+          console.log("Service Worker Registered");
+        });
+      }
+
+      let deferredPrompt;
+      const addBtn = document.querySelector(".add-button");
+      addBtn.style.display = "none";
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI to notify the user they can add to home screen
+        addBtn.style.display = "block";
+
+        addBtn.addEventListener("click", () => {
+          // hide our user interface that shows our A2HS button
+          addBtn.style.display = "none";
+          // Show the prompt
+          deferredPrompt.prompt();
+          // Wait for the user to respond to the prompt
+          deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === "accepted") {
+              console.log("User accepted the A2HS prompt");
+            } else {
+              console.log("User dismissed the A2HS prompt");
+            }
+            deferredPrompt = null;
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
